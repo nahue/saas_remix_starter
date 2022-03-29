@@ -24,6 +24,7 @@ import {
   updateUser,
 } from "~/models/user.server";
 import invariant from "tiny-invariant";
+import { Label } from "@radix-ui/react-label";
 
 type LoaderData = {
   user: User | null;
@@ -91,7 +92,8 @@ export const action: ActionFunction = async ({ request }) => {
     );
   }
 
-  const user = await updateUser(email, name);
+    console.log({userId, name})
+  const user = await updateUser(userId, name);
   return json<ActionData>(
     {
       errors: {},
@@ -122,17 +124,35 @@ export default function UserDetailPage() {
 
             <div className="grid grid-cols-1 mt-6 gap-y-6 gap-x-4 sm:grid-cols-6">
               <input type="hidden" name="id" value={user.id} />
-              <input type="hidden" name="email" value={user.email} />
-              <div>
-                <label>{user.email}</label>
+              <div className="sm:col-span-4">
+                <Label
+                  htmlFor="email"
+                  className="block text-sm font-medium text-gray-700"
+                >
+                  Email
+                </Label>
+                <div className="flex mt-1 rounded-md shadow-sm">
+                  <span className="inline-flex items-center px-3 text-gray-500 border border-r-0 border-gray-300 rounded-l-md bg-gray-50 sm:text-sm">
+                    @
+                  </span>
+                  <input
+                    type="text"
+                    name="email"
+                    id="email"
+                    autoComplete="username"
+                    className="flex-1 block w-full min-w-0 border-gray-300 rounded-none rounded-r-md focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                    defaultValue={user.email}
+                    readOnly
+                  />
+                </div>
               </div>
               <div>
-                <label
+                <Label
                   htmlFor="email"
                   className="block text-sm font-medium text-gray-700"
                 >
                   Name
-                </label>
+                </Label>
                 <div className="mt-1">
                   <input
                     type="text"

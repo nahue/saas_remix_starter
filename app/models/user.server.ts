@@ -66,6 +66,6 @@ export async function listUsers() {
     return prisma.user.findMany();
 }
 
-export async function updateUser(email: User["email"], name: User["name"]) {
-    return prisma.user.update({where: {email}, data: {name}})
+export async function updateUser(id: User["id"], name: User["name"]) {
+    return prisma.user.update({where: {id}, data: {name}})
 }
