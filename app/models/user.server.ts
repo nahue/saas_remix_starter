@@ -61,3 +61,11 @@ export async function verifyLogin(
 
   return userWithoutPassword;
 }
+
+export async function listUsers() {
+    return prisma.user.findMany();
+}
+
+export async function updateUser(email: User["email"], name: User["name"]) {
+    return prisma.user.update({where: {email}, data: {name}})
+}
