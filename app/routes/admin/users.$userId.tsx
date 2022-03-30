@@ -76,7 +76,11 @@ export const action: ActionFunction = async ({ request }) => {
     );
   }
 
-  if (typeof firstName !== "string" || typeof lastName !== "string" || typeof about !== "string") {
+  if (
+    typeof firstName !== "string" ||
+    typeof lastName !== "string" ||
+    typeof about !== "string"
+  ) {
     return badRequest({
       formError: `Form not submitted correctly.`,
     });

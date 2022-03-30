@@ -36,7 +36,7 @@ export const loader: LoaderFunction = async ({ request }) => {
 
 export default function UsersPage() {
   const { users } = useLoaderData() as LoaderData;
-  const loggedInUser = useUser()
+  const loggedInUser = useUser();
 
   return (
     <div className="px-4 mx-auto max-w-7xl sm:px-6 md:px-8">
@@ -102,7 +102,10 @@ export default function UsersPage() {
                   </div>
                 </td>
                 <td className="relative flex gap-4 py-4 pl-3 pr-4 text-sm font-medium text-right whitespace-nowrap sm:pr-6">
-                  <Link to={`/admin/users/${user.id}`} className="text-indigo-600 hover:text-indigo-900">
+                  <Link
+                    to={`/admin/users/${user.id}`}
+                    className="text-indigo-600 hover:text-indigo-900"
+                  >
                     Edit<span className="sr-only">, {user.name}</span>
                   </Link>
                   {loggedInUser && loggedInUser.id != user.id && (
