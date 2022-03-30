@@ -1,13 +1,6 @@
-import { Fragment, useState } from "react";
-import { Dialog, Transition } from "@headlessui/react";
-import { HomeIcon, MenuIcon, XIcon, UsersIcon } from "@heroicons/react/outline";
 import {
   json,
-  Outlet,
-  NavLink,
-  redirect,
   useLoaderData,
-  MetaFunction,
   Form,
   ActionFunction,
   useActionData,
@@ -15,14 +8,8 @@ import {
 import type { LoaderFunction } from "remix";
 
 import { getUser, requireUserId } from "~/session.server";
-import { hasRole, useUser } from "~/utils";
-import { Role, User } from "@prisma/client";
-import {
-  createUser,
-  getUserById,
-  listUsers,
-  updateUser,
-} from "~/models/user.server";
+import { User } from "@prisma/client";
+import { getUserById, updateUser } from "~/models/user.server";
 import invariant from "tiny-invariant";
 import { Label } from "@radix-ui/react-label";
 
@@ -31,50 +18,47 @@ type LoaderData = {
 };
 
 export const loader: LoaderFunction = async ({ request, params }) => {
-  const loggedInUser = await getUser(request);
+  // const loggedInUser = await getUser(request);
   invariant(params.userId, "userId not found");
-
-  //   if (!hasRole(loggedInUser, Role.ADMIN)) return redirect("/");
-
-  const user = await getUserById(params.userId);
-  console.log(user);
   return json<LoaderData>({
-    user,
+    user: await getUserById(params.userId),
   });
 };
 
 type ActionData = {
-  errors?: {
-    id?: string;
-    email?: string;
-    name?: string;
+  formError?: string;
+  fieldErrors?: {
+    id?: string | undefined;
+    email?: string | undefined;
+    firstName?: string | undefined;
+    lastName?: string | undefined;
+    about?: string | undefined;
+  };
+  fields?: {
+    loginType: string;
+    username: string;
+    password: string;
+    about: string;
   };
 };
 
+const badRequest = (data: ActionData) => json(data, { status: 400 });
+
 export const action: ActionFunction = async ({ request }) => {
-  const loggedUserId = await requireUserId(request);
+  // const loggedUserId = await requireUserId(request);
 
   const formData = await request.formData();
   const userId = formData.get("id");
   const email = formData.get("email");
-  const name = formData.get("name");
+  const firstName = formData.get("firstName");
+  const lastName = formData.get("lastName");
+  const about = formData.get("about");
 
   if (typeof email !== "string" || email.length === 0) {
     return json<ActionData>(
       {
-        errors: {
+        fieldErrors: {
           email: "Email is empty",
-        },
-      },
-      { status: 400 }
-    );
-  }
-
-  if (typeof name !== "string" || name.length === 0) {
-    return json<ActionData>(
-      {
-        errors: {
-          name: "Name is empty",
         },
       },
       { status: 400 }
@@ -84,7 +68,7 @@ export const action: ActionFunction = async ({ request }) => {
   if (typeof userId !== "string" || userId.length === 0) {
     return json<ActionData>(
       {
-        errors: {
+        fieldErrors: {
           id: "User Id is empty",
         },
       },
@@ -92,14 +76,14 @@ export const action: ActionFunction = async ({ request }) => {
     );
   }
 
-    console.log({userId, name})
-  const user = await updateUser(userId, name);
-  return json<ActionData>(
-    {
-      errors: {},
-    },
-    { status: 200 }
-  );
+  if (typeof firstName !== "string" || typeof lastName !== "string" || typeof about !== "string") {
+    return badRequest({
+      formError: `Form not submitted correctly.`,
+    });
+  }
+
+  await updateUser({ id: userId, firstName, lastName, about });
+  return json<ActionData>({}, { status: 200 });
 };
 
 export default function UserDetailPage() {
@@ -146,32 +130,78 @@ export default function UserDetailPage() {
                   />
                 </div>
               </div>
-              <div>
+              <div className="sm:col-span-3">
                 <Label
                   htmlFor="email"
                   className="block text-sm font-medium text-gray-700"
                 >
-                  Name
+                  First Name
                 </Label>
                 <div className="mt-1">
                   <input
                     type="text"
-                    name="name"
-                    id="name"
+                    name="firstName"
+                    id="firstName"
                     className="block w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                    placeholder="Name"
-                    defaultValue={user.name}
+                    placeholder="First Name"
+                    defaultValue={user.firstName}
                   />
                 </div>
               </div>
-              <div className="text-right">
-                <button
-                  type="submit"
-                  className="px-4 py-2 text-white bg-blue-500 rounded hover:bg-blue-600 focus:bg-blue-400"
+              <div className="sm:col-span-3">
+                <Label
+                  htmlFor="email"
+                  className="block text-sm font-medium text-gray-700"
                 >
-                  Save
-                </button>
+                  Last Name
+                </Label>
+                <div className="mt-1">
+                  <input
+                    type="text"
+                    name="lastName"
+                    id="lastName"
+                    className="block w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                    placeholder="Last Name"
+                    defaultValue={user.lastName}
+                  />
+                </div>
               </div>
+              <div className="sm:col-span-6">
+                <label
+                  htmlFor="about"
+                  className="block text-sm font-medium text-gray-700"
+                >
+                  About
+                </label>
+                <div className="mt-1">
+                  <textarea
+                    id="about"
+                    name="about"
+                    rows={3}
+                    className="block w-full border border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                    defaultValue={user.about}
+                  />
+                </div>
+                <p className="mt-2 text-sm text-gray-500">
+                  Write a few sentences about yourself.
+                </p>
+              </div>
+            </div>
+          </div>
+          <div className="pt-5">
+            <div className="flex justify-end">
+              <button
+                type="button"
+                className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                className="inline-flex justify-center px-4 py-2 ml-3 text-sm font-medium text-white bg-indigo-600 border border-transparent rounded-md shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+              >
+                Save
+              </button>
             </div>
           </div>
         </div>

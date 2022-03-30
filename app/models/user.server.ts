@@ -1,5 +1,6 @@
 import { Password, Role, User } from "@prisma/client";
 import bcrypt from "bcryptjs";
+import { useReducer } from "react";
 
 import { prisma } from "~/db.server";
 
@@ -66,6 +67,6 @@ export async function listUsers() {
     return prisma.user.findMany();
 }
 
-export async function updateUser(id: User["id"], name: User["name"]) {
-    return prisma.user.update({where: {id}, data: {name}})
+export async function updateUser({id, firstName, lastName, about}: Pick<User, "id" | "firstName" | "lastName" | "about">) {
+    return prisma.user.update({where: {id}, data: {firstName, lastName, about}})
 }

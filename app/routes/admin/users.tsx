@@ -59,7 +59,13 @@ export default function UsersPage() {
                 scope="col"
                 className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
               >
-                Name
+                Fist Name
+              </th>
+              <th
+                scope="col"
+                className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
+              >
+                Last Name
               </th>
               <th
                 scope="col"
@@ -79,7 +85,10 @@ export default function UsersPage() {
                   {user.email}
                 </td>
                 <td className="px-3 py-4 text-sm text-gray-500 whitespace-nowrap">
-                  {user.name}
+                  {user.firstName}
+                </td>
+                <td className="px-3 py-4 text-sm text-gray-500 whitespace-nowrap">
+                  {user.lastName}
                 </td>
                 <td className="px-3 py-4 text-sm text-gray-500 whitespace-nowrap">
                   <div className="flex gap-2">
